@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Query Visualizer - Employee Bonus Problem</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .problem-statement {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            line-height: 1.6;
+        }
+
+        .problem-statement ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .problem-statement li {
+            margin-bottom: 8px;
+        }
+
+        .sql-code {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .sql-code .keyword {
+            color: #c678dd;
+        }
+
+        .sql-code .table {
+            color: #e06c75;
+        }
+
+        .sql-code .column {
+            color: #61afef;
+        }
+
+        .sql-code .operator {
+            color: #56b6c2;
+        }
+
+        .sql-code .number {
+            color: #d19a66;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        table caption {
+            caption-side: top;
+            font-weight: bold;
+            font-size: 1.1em;
+            padding: 10px;
+            background: #667eea;
+            color: white;
+            border-radius: 8px 8px 0 0;
+        }
+
+        th {
+            background: #764ba2;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        tr:nth-child(even):hover {
+            background: #f0f0f0;
+        }
+
+        .null-value {
+            color: #999;
+            font-style: italic;
+        }
+
+        .tables-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .explanation {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #0066cc;
+            line-height: 1.6;
+        }
+
+        .explanation h3 {
+            color: #0066cc;
+            margin-bottom: 10px;
+        }
+
+        .btn-execute {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            display: block;
+            margin: 20px auto;
+        }
+
+        .btn-execute:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-execute:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .tables-container {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 1.5em;
+            }
+
+            .content {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 SQL Query Visualizer</h1>
+            <p>Employee Bonus Problem - LeetCode Style Challenge</p>
+        </header>
+
+        <div class="content">
+            <div class="section">
+                <h2>Problem Statement</h2>
+                <div class="problem-statement">
+                    <p><strong>Objective:</strong> Write a MySQL query that reports the name and bonus of every employee who satisfies at least one of the following conditions:</p>
+                    <ul>
+                        <li>The employee has a bonus value that is <span class="highlight">strictly less than 1000</span></li>
+                        <li>The employee <span class="highlight">did not receive any bonus</span> (no matching record in the Bonus table)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Input Tables</h2>
+                <div class="tables-container">
+                    <div>
+                        <table>
+                            <caption>Employee</caption>
+                            <thead>
+                                <tr>
+                                    <th>empId</th>
+                                    <th>name</th>
+                                    <th>supervisor</th>
+                                    <th>salary</th>
+                                </tr>
+                            </thead>
+                            <tbody id="employee-table">
+                                <tr>
+                                    <td>3</td>
+                                    <td>Brad</td>
+                                    <td><span class="null-value">NULL</span></td>
+                                    <td>4000</td>
+                                </tr>
+                                <tr>
+                                    <td>1</td>
+                                    <td>John</td>
+                                    <td>3</td>
+                                    <td>1000</td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>Dan</td>
+                                    <td>3</td>
+                                    <td>2000</td>
+                                </tr>
+                                <tr>
+                                    <td>4</td>
+                                    <td>Thomas</td>
+                                    <td>3</td>
+                                    <td>4000</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div>
+                        <table>
+                            <caption>Bonus</caption>
+                            <thead>
+                                <tr>
+                                    <th>empId</th>
+                                    <th>bonus</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bonus-table">
+                                <tr>
+                                    <td>2</td>
+                                    <td>500</td>
+                                </tr>
+                                <tr>
+                                    <td>4</td>
+                                    <td>2000</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Optimized MySQL Solution</h2>
+                <pre class="sql-code"><span class="keyword">SELECT</span>
+    <span class="table">e</span>.<span class="column">name</span>,
+    <span class="table">b</span>.<span class="column">bonus</span>
+<span class="keyword">FROM</span>
+    <span class="table">Employee</span> <span class="table">e</span>
+<span class="keyword">LEFT JOIN</span>
+    <span class="table">Bonus</span> <span class="table">b</span> <span class="keyword">ON</span> <span class="table">e</span>.<span class="column">empId</span> <span class="operator">=</span> <span class="table">b</span>.<span class="column">empId</span>
+<span class="keyword">WHERE</span>
+    <span class="table">b</span>.<span class="column">bonus</span> <span class="operator">&lt;</span> <span class="number">1000</span> <span class="keyword">OR</span> <span class="table">b</span>.<span class="column">bonus</span> <span class="keyword">IS NULL</span>;</pre>
+            </div>
+
+            <button class="btn-execute" onclick="executeQuery()">▶ Execute Query</button>
+
+            <div class="section" id="result-section" style="display: none;">
+                <h2>Query Result</h2>
+                <table>
+                    <caption>Output</caption>
+                    <thead>
+                        <tr>
+                            <th>name</th>
+                            <th>bonus</th>
+                        </tr>
+                    </thead>
+                    <tbody id="result-table">
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>Solution Explanation</h2>
+                <div class="explanation">
+                    <h3>🔍 Query Logic:</h3>
+                    <p><strong>1. LEFT JOIN:</strong> We use a LEFT JOIN between Employee and Bonus tables to ensure all employees are included, even those without bonus records.</p>
+                    <p><strong>2. WHERE Clause:</strong> The condition <code>b.bonus < 1000 OR b.bonus IS NULL</code> filters for:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>b.bonus < 1000:</strong> Employees with bonuses strictly less than 1000</li>
+                        <li><strong>b.bonus IS NULL:</strong> Employees with no bonus record (LEFT JOIN produces NULL for unmatched rows)</li>
+                    </ul>
+                    <h3 style="margin-top: 15px;">⚡ Performance Optimization:</h3>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>LEFT JOIN is efficient for this use case as it performs a single pass through both tables</li>
+                        <li>The WHERE clause filters are applied after the join, which is optimal for this logic</li>
+                        <li>Indexing on empId columns (primary keys) ensures fast join performance</li>
+                        <li>No unnecessary sorting or aggregation operations</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Why This Works</h2>
+                <div class="explanation">
+                    <p><strong>Brad:</strong> No bonus record → b.bonus IS NULL → Included ✓</p>
+                    <p><strong>John:</strong> No bonus record → b.bonus IS NULL → Included ✓</p>
+                    <p><strong>Dan:</strong> Bonus = 500 < 1000 → Included ✓</p>
+                    <p><strong>Thomas:</strong> Bonus = 2000 ≥ 1000 → Excluded ✗</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const employeeData = [
+            { empId: 3, name: 'Brad', supervisor: null, salary: 4000 },
+            { empId: 1, name: 'John', supervisor: 3, salary: 1000 },
+            { empId: 2, name: 'Dan', supervisor: 3, salary: 2000 },
+            { empId: 4, name: 'Thomas', supervisor: 3, salary: 4000 }
+        ];
+
+        const bonusData = [
+            { empId: 2, bonus: 500 },
+            { empId: 4, bonus: 2000 }
+        ];
+
+        function executeQuery() {
+            const results = [];
+
+            // Simulate LEFT JOIN and WHERE clause
+            employeeData.forEach(emp => {
+                const bonusRecord = bonusData.find(b => b.empId === emp.empId);
+                const bonus = bonusRecord ? bonusRecord.bonus : null;
+
+                // WHERE b.bonus < 1000 OR b.bonus IS NULL
+                if (bonus === null || bonus < 1000) {
+                    results.push({
+                        name: emp.name,
+                        bonus: bonus
+                    });
+                }
+            });
+
+            displayResults(results);
+        }
+
+        function displayResults(results) {
+            const resultTable = document.getElementById('result-table');
+            const resultSection = document.getElementById('result-section');
+
+            resultTable.innerHTML = '';
+
+            results.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.name}</td>
+                    <td>${row.bonus === null ? '<span class="null-value">NULL</span>' : row.bonus}</td>
+                `;
+                resultTable.appendChild(tr);
+            });
+
+            resultSection.style.display = 'block';
+            resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    </script>
+</body>
+</html>
